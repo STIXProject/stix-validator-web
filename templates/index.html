@@ -1,0 +1,73 @@
+<html lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Language" content="en">
+    <title>STIX Web Validator</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,300' rel='stylesheet' type='text/css'>
+    <link href="/styles.css" media="all" rel="stylesheet" />
+    <script src="/scripts.js"></script>
+
+
+    <body>
+      <h1>STIX Validator</h1>
+
+      <form action="/" method="POST" name="stix">
+        <div id="url-input">
+          <label for="url">Validate by URL...</label>
+          <input placeholder="http://" name="url" id="url" value="{{url}}" id="xml"></input>
+        </div>
+
+        <div id="xml-input">
+          <label for="xml">Validate by XML...</label>
+          <textarea rows="10" placeholder="<stix:STIX_Package>...</stix:STIX_Package>" name="xml" id="xml">{{xml}}</textarea>
+        </div>
+
+        <button type="submit">Validate!</button>
+      </form>
+
+      {% if results and results['result'] == 'validated' %}
+        <h2>Results</h2>
+        <div id="results">
+          <table class="table">
+            <caption>XML Validation</caption>
+            <tbody>
+              {% if results['xml']['result'] == True %}
+                <tr class="valid"><td colspan="2">Valid!</tr>
+              {% else %}
+                <tr class="headings"><th>Line number</th><th>Message</th></tr>
+                {% for error in results['xml']['errors'] %}
+                  <tr class="schema-error"><td>{{error['line']}}</td><td>{{error['message']}}</td></tr>
+                {% endfor %}
+              {% endif %}
+            </tbody>
+          </table>
+          <table class="table">
+            <caption>Best Practice Validation</caption>
+            <tbody>
+              {% if results['best_practices']['result'] == True %}
+                <tr class="valid"><td colspan="4">Valid!</tr>
+              {% else %}
+                <tr class="headings"><th>Category</th><th>Line number</th><th>Tag</th><th>Message</th></tr>
+                {% for error in results['best_practices']['errors'] %}
+                  {% for key in error %}
+                    {% for result in error[key] %}
+                    <tr class="bp-error"><td>{{key}}</td><td>{{ result['line'] }}</td><td>{{result['tag']}}</td><td>{{ result['message'] }}</td></tr>
+                    {% endfor %}
+                  {% endfor %}
+
+                {% endfor %}
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+        <h3>JSON Results</h3>
+        <pre>{{json}}</pre>
+      {% elif results and results['result'] == 'error' %}
+        <h2>Results</h2>
+        <p class="error">Unable to validate: {{results['message']}}</p>
+      {% endif %}
+    </body>
+
+
+</html>

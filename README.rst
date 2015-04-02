@@ -15,7 +15,6 @@ The stix-validator-web package wraps the Python stix-validator with a simple web
 Installation
 ------------
 
-
 Dependencies
 ------------
 
