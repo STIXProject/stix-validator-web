@@ -12,14 +12,13 @@ def validate_ws():
     url = request.args.get('url')
 
     if url:
-        try:
-            return wrap_json_results(urllib2.urlopen(url).read())
-        except ValueError:
-            return Response('{"result": "error", "message": "could not find xml"}\n', mimetype='application/json')
+        results = validate_url(url)
     elif len(post_data) > 0:
-        return wrap_json_results(post_data)
+        results = validate_xml(post_data)
     else:
-        return Response('{"result": "error", "message": "could not find xml"}\n', mimetype='application/json')
+        results = {"result": "error", "message": "could not find xml"}
+
+    return Response(json.dumps(results),mimetype="application/json")
 
 @app.route('/', methods=['POST', 'GET'])
 def root():
@@ -28,34 +27,32 @@ def root():
         xml = request.form['xml']
 
         if url and len(url) > 0:
-            try:
-                results = get_results(urllib2.urlopen(url).read())
-            except ValueError:
-                results = {"result": "error", "message": "could not open url"}
+            results = validate_url(url)
         elif xml and len(xml) > 0:
-            try:
-                results = get_results(xml)
-            except sdv.errors.ValidationError:
-                results = {"result": "error", "message": "not well-formed"}
+            results = validate_xml(xml)
         else:
             results = {"result": "error", "message": "could not find xml"}
 
         return render_template('index.html', results=results, url=url, xml=xml, json=json.dumps(results))
-
     else:
         return render_template('index.html', results=None)
 
 
-def get_results(data):
-    return {
-        "xml": sdv.validate_xml(StringIO.StringIO(data)).as_dict(),
-        "best_practices": sdv.validate_best_practices(StringIO.StringIO(data)).as_dict(),
-        "result": "validated"
-    }
+def validate_xml(data):
+    try:
+        return {
+            "xml": sdv.validate_xml(StringIO.StringIO(data)).as_dict(),
+            "best_practices": sdv.validate_best_practices(StringIO.StringIO(data)).as_dict(),
+            "result": "validated"
+        }
+    except sdv.errors.ValidationError as e:
+        return {"result": "error", "message": str(e)}
 
-
-def wrap_json_results(data):
-    return Response(json.dumps(results.as_json()) + "\n", mimetype='application/json')
+def validate_url(url):
+    try:
+        return validate_xml(urllib2.urlopen(url).read())
+    except ValueError:
+        return {"result": "error", "message": "could not open url"}
 
 if __name__ == "__main__":
     app.run('localhost', 5000, True)
