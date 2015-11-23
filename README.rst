@@ -24,10 +24,7 @@ The stix-validator-web library depends on ``Flask`` and ``stix-validator``.
 Feedback
 --------
 
-You are encouraged to provide feedback by commenting on open issues or signing
-up for the `STIX discussion list
-<http://stix.mitre.org/community/registration.html>`_ and posting your
-questions.
+Please send feeback to [stix@mitre.org](mailto:stix@mitre.org).
 
 
 Terms
