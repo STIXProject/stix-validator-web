@@ -20,6 +20,7 @@ Dependencies
 
 The stix-validator-web library depends on ``Flask`` and ``stix-validator``.
 
+It currently runs only on Python 2.
 
 Feedback
 --------
